@@ -266,6 +266,33 @@
         </div>
     </footer>
 
+    <!-- Smart Wallet Login Modal -->
+    <div id="login-modal" class="modal-overlay">
+        <div class="login-modal-content">
+            <div id="login-step-1">
+                <div class="biometric-icon">
+                    🔐
+                </div>
+                <h3 class="modal-title" style="margin-bottom: 0.5rem;">Secure Login</h3>
+                <p class="login-sub-text">Access your Institutional Credit Profile</p>
+
+                <div class="login-btn-group">
+                    <button id="passkey-login-btn" class="passkey-btn">
+                        <span>🔑</span> Use Passkey (FaceID / TouchID)
+                    </button>
+                </div>
+            </div>
+
+            <div id="login-step-2" style="display: none;">
+                <div class="biometric-icon">
+                    <span id="scan-emoji">👁️</span>
+                    <div class="biometric-scan-line"></div>
+                </div>
+                <div class="login-status-text">Verifying Passkey...</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Address Input Modal -->
     <div id="address-modal" class="modal-overlay">
         <div class="modal-content">

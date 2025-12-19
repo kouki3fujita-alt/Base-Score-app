@@ -107,6 +107,7 @@ body {
     margin-bottom: 1.5rem;
     line-height: 1.1;
     background: var(--gradient-hero);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: fadeInDown 1s cubic-bezier(0.2, 0.8, 0.2, 1);
