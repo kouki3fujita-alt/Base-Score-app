@@ -1,0 +1,22 @@
+2025-12-19 12:34:05,924 - INFO - Agent: fujitakouki | Action: Starting Secure Integration Agent
+2025-12-19 12:34:05,924 - INFO - Agent: fujitakouki | Action: Initiating new OAuth flow
+2025-12-19 12:41:27,429 - INFO - Agent: fujitakouki | Action: Searching for requirements document
+2025-12-19 12:41:27,429 - INFO - Agent: fujitakouki | Action: Initiating new OAuth flow
+2025-12-19 12:46:10,090 - INFO - Agent: fujitakouki | Action: Searching for requirements document
+2025-12-19 12:46:10,090 - INFO - Agent: fujitakouki | Action: Initiating new OAuth flow
+2025-12-19 12:46:26,074 - INFO - "GET /?state=0xUhAt4HOJ3sKaQ7vIewEUvcpuYBFC&code=4/0ATX87lMfeutxfOIv6An68ke7ZUUFIf--jjCuZ3ZHXfdlXCmXZBSFO35_9RfUnGT2LrM5Mg&scope=https://www.googleapis.com/auth/drive.readonly%20https://www.googleapis.com/auth/documents.readonly HTTP/1.1" 200 65
+2025-12-19 12:46:26,767 - INFO - Agent: fujitakouki | Action: Saving new credentials
+2025-12-19 12:46:26,771 - WARNING - SECURITY_EVENT: File Permission Set | Set 600 permissions on token.pickle
+2025-12-19 12:46:26,777 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-12-19 12:46:27,241 - WARNING - Encountered 403 Forbidden with reason "accessNotConfigured"
+2025-12-19 12:47:08,984 - INFO - Agent: fujitakouki | Action: Loading existing credentials
+2025-12-19 12:47:08,985 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-12-19 12:47:09,384 - WARNING - Encountered 403 Forbidden with reason "accessNotConfigured"
+2025-12-19 12:49:10,164 - INFO - Agent: fujitakouki | Action: Searching for requirements document: Base_Score_要件定義書
+2025-12-19 12:49:10,164 - INFO - Agent: fujitakouki | Action: Loading existing credentials
+2025-12-19 12:49:10,165 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-12-19 12:49:28,732 - INFO - Agent: fujitakouki | Action: Fetching content for: Base_Score_要件定義書
+2025-12-19 12:49:28,732 - INFO - Agent: fujitakouki | Action: Loading existing credentials
+2025-12-19 12:49:28,733 - INFO - file_cache is only supported with oauth2client<4.0.0
+2025-12-19 12:49:29,568 - INFO - Agent: fujitakouki | Action: Loading existing credentials
+2025-12-19 12:49:29,569 - INFO - file_cache is only supported with oauth2client<4.0.0

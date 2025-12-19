@@ -1,0 +1,15 @@
+type ScoreProof @entity {
+  id: ID! # Transaction Hash
+  user: Bytes! # User Address
+  score: BigInt!
+  tier: Int!
+  timestamp: BigInt!
+  blockNumber: BigInt!
+}
+
+type User @entity {
+  id: ID! # User Address
+  currentScore: BigInt!
+  currentTier: Int!
+  proofs: [ScoreProof!]! @derivedFrom(field: "user")
+}

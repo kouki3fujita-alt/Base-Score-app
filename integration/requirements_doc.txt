@@ -1,0 +1,487 @@
+Base Score
+プライバシー保護型DeFiスコアリングシステム
+要件定義書 v1.0
+作成日: 2025/12/19
+機密情報 - 社外秘
+目次
+1. プロジェクト概要
+1.1 プロジェクト名
+プロジェクト名: 
+Base Score
+サブタイトル: 
+ゼロ知識証明を活用したプライバシー保護型DeFiスコアリングプラットフォーム
+1.2 プロジェクトの目的
+Base Score は、ブロックチェーン上のユーザーの取引履歴や資産保有状況を公開することなく、DeFiプロトコルにおける信用力を証明できるプラットフォームです。ゼロ知識証明技術（ZK-SNARKs）を活用し、プライバシーを完全に保護しながら、レンディングプロトコルやその他のDeFiサービスにおける信用評価を可能にします。
+1.3 ターゲットユーザー
+主要ターゲット: 
+Base ブロックチェーン上のDeFiアプリケーションを使用する一般ユーザー
+ユーザー特性: 
+技術的知識は限定的だが、DeFiサービス（レンディング、流動性提供等）を日常的に利用している個人投資家
+利用シーン: 
+融資の信用審査、限定NFTミントの資格証明、プレミアムDeFiサービスへのアクセス等
+1.4 プロジェクトスコープ
+開発フェーズ: 
+MVP（Phase 1）からPhase 2までを本要件定義書の対象とする
+ローンチ予定: 
+今夜（2025年12月19日）
+対象チェーン: 
+Base（Ethereum Layer 2）
+ビジネスモデル: 
+完全無料（コミュニティ貢献型）
+2. システムアーキテクチャ
+2.1 技術スタック
+2.1.1 フロントエンド
+• フレームワーク: Next.js 14 (App Router)
+• 言語: TypeScript
+• ウォレット接続: wagmi v2
+• Ethereum統合: viem
+• UI/スタイリング: Tailwind CSS
+• アニメーション: Framer Motion
+2.1.2 ゼロ知識証明
+• 証明システム: Noir（Aztec製）
+• バックエンド: BarretenbergBackend
+• 証明生成: @noir-lang/noir_js
+• 回路言語: Noir DSL（Rust風構文）
+2.1.3 スマートコントラクト
+• 言語: Solidity 0.8.20+
+• デプロイ先: Base Mainnet
+• 開発環境: Foundry
+• テストネット: Base Sepolia
+2.1.4 バックエンド・インフラ
+• データインデックス: The Graph（Base対応）
+• RPC: Base公式RPC / Alchemy
+• ホスティング: Vercel
+2.2 システム構成図
+【レイヤー構成】
+Layer 1: ユーザーインターフェース（Webアプリケーション）
+↓
+Layer 2: データ収集・分析層（The Graph + viemクライアント）
+↓
+Layer 3: ZK証明生成層（Noirクライアント、ブラウザ内実行）
+↓
+Layer 4: オンチェーン検証層（Base スマートコントラクト）
+↓
+Layer 5: DeFiプロトコル統合層（Aerodrome、Aave等との連携）
+2.3 データフロー
+1. ユーザーがウォレット接続
+2. システムがオンチェーンデータを取得（残高、取引履歴、DeFi利用履歴）
+3. ブラウザ内でZK証明を生成（プライベート入力: 実データ、パブリック出力: スコア）
+4. 生成された証明をスマートコントラクトに送信
+5. スマートコントラクトが証明を検証し、スコアを記録
+6. DeFiプロトコルがスコアを参照して意思決定
+3. 機能要件
+3.1 スコアリング指標
+3.1.1 必須指標（MVP - Phase 1）
+指標名
+条件
+重要度
+説明
+ETH保有残高
+≥ 0.5 ETH
+高
+Base上の現在のETH残高
+保有期間
+≥ 30日
+高
+0.1 ETH以上を継続保有した日数
+取引回数
+≥ 20回
+中
+Base上での総トランザクション数
+アクティブ期間
+≥ 60日
+中
+初回取引からの経過日数
+3.1.2 DeFi特化指標（Phase 1-2）
+指標名
+条件
+重要度
+説明
+DEX取引量
+≥ 1 ETH
+高
+Aerodrome/Uniswapでの累積取引額
+レンディング利用実績
+≥ 1回
+高
+Aaveでの貸出または借入実績
+流動性提供額
+≥ 0.3 ETH
+中
+DEXへのLP提供総額
+清算履歴
+= 0回
+高
+レンディングでの清算経験なし
+ステーキング残高
+≥ 0.2 ETH
+中
+各種プロトコルでのステーキング額
+3.2 スコアシステム
+3.2.1 スコア形式
+• スコア範囲: 0-1000点
+• 証明内容: ユーザーは実際のスコアを公開せず、範囲のみ証明可能
+  例: 「私のスコアは700点以上です」（実際のスコアは非公開）
+3.2.2 スコアレベル
+• Elite（800-1000点）: トップティアのDeFiユーザー
+• Advanced（600-799点）: 経験豊富なDeFiユーザー
+• Intermediate（400-599点）: 一般的なDeFiユーザー
+• Beginner（200-399点）: DeFi初心者
+• New（0-199点）: Base使用開始間もないユーザー
+3.2.3 スコア計算ロジック
+総スコア = Σ(各指標スコア × 重み)
+【重み配分】
+• ETH保有残高: 20%
+• 保有期間: 15%
+• 取引回数: 10%
+• アクティブ期間: 10%
+• DEX取引量: 20%
+• レンディング利用実績: 15%
+• 流動性提供額: 5%
+• 清算履歴（ペナルティ）: -20%（清算経験あり）
+• ステーキング残高: 5%
+3.2.4 証明の有効期限
+• 標準有効期限: 30日間
+• 更新: ユーザーは任意のタイミングで再証明可能
+• 有効期限切れ: 自動的に無効化、DeFiプロトコルから参照不可
+3.3 コア機能
+3.3.1 ウォレット接続
+• 対応ウォレット: MetaMask、Coinbase Wallet、WalletConnect対応ウォレット
+• チェーン検証: Base（Chain ID: 8453）への接続を強制
+• 接続状態管理: wagmi hooks（useAccount, useConnect）を使用
+3.3.2 データ収集
+• 残高取得: viem getBalance() API
+• 取引履歴: The Graph経由でBase上の全トランザクションを取得
+• DeFi利用履歴: Aerodrome、Aaveのサブグラフからユーザー活動を取得
+• リアルタイム性: 最新ブロックから10ブロック以内のデータを使用
+3.3.3 ZK証明生成
+• 実行環境: ブラウザ内（WebAssembly）
+• 生成時間: 目標3-10秒
+• プライバシー: すべての計算はクライアント側で完結、サーバーに秘密情報を送信しない
+• 証明内容: 「私のスコアはX点以上である」という主張
+• 非同期処理: Web Workerを使用してUIをブロックしない
+3.3.4 オンチェーン検証・記録
+• 検証: スマートコントラクトで証明の正当性を検証
+• 記録: ユーザーアドレスとスコアレベル、有効期限をオンチェーンに保存
+• ガス最適化: 検証ロジックを最適化し、ガスコストを最小化
+• イベント発行: スコア登録時にイベントを発行（The Graphでインデックス可能）
+3.3.5 DeFiプロトコル統合
+• 統合先（Phase 2）:
+  1. Aerodrome Finance（DEX、Base最大TVL）
+  2. Aave（レンディング、Base上で主要）
+• 統合方法: プロトコル側がBase Scoreコントラクトを参照し、スコアを取得
+• ユースケース:
+  - Aave: 高スコアユーザーに優遇金利を提供
+  - Aerodrome: 高スコアユーザーに限定トークンエアドロップ
+3.4 ユーザーインターフェース機能
+3.4.1 ホーム/ランディングページ
+【目的】
+Base Scoreの価値提案を明確に伝え、ユーザーを登録に誘導
+【コンテンツ】
+• ヒーローセクション: キャッチコピー + CTA（「スコアを証明する」ボタン）
+• 特徴説明: プライバシー保護、DeFi統合、無料利用
+• 仕組み解説: 3ステップで説明（接続 → 証明 → 活用）
+• 統合プロトコル: AerodromeとAaveのロゴ表示
+• FAQ: よくある質問（「データは安全？」「費用は？」等）
+3.4.2 ダッシュボード（スコア表示）
+【目的】
+ユーザーのスコア状況を視覚的に表示
+【コンテンツ】
+• スコア表示: 大きな数値とレベル（Elite/Advanced等）
+• ビジュアル: 円形プログレスバー、カラーコード（Elite=ゴールド、Advanced=シルバー等）
+• 有効期限: 残り日数を表示
+• 内訳: 各指標の達成状況を個別に表示
+• 改善提案: 「あと0.2 ETHでAdvancedレベル到達」等のヒント
+• 証明状態: 「証明済み」「未証明」「期限切れ」の状態表示
+3.4.3 証明生成画面
+【目的】
+ユーザーがスコア証明を生成するメイン画面
+【コンテンツ】
+• データ取得ステータス: 「データ取得中...」「データ取得完了」
+• プレビュー: 証明前にスコアを確認可能
+• 証明生成ボタン: プログレスバー付き
+• 進行状況: 「証明生成中...（30%）」「トランザクション送信中...」
+• エラーハンドリング: 失敗時にわかりやすいメッセージ表示
+• 成功画面: 証明完了後、トランザクションハッシュと次のアクション提示
+3.4.4 証明履歴
+【目的】
+過去の証明履歴を確認
+【コンテンツ】
+• テーブル表示: 日時、スコア、レベル、有効期限、トランザクションリンク
+• フィルタ: 有効/期限切れで絞り込み
+• 詳細表示: 各証明の詳細情報をモーダルで表示
+• エクスポート: CSV形式でダウンロード可能
+3.4.5 統合先プロトコル一覧
+【目的】
+Base Scoreを活用できるDeFiプロトコルを紹介
+【コンテンツ】
+• プロトコルカード: ロゴ、名前、カテゴリ、特典内容
+• Aerodrome: 「限定トークンエアドロップに参加可能」
+• Aave: 「高スコアユーザー向け優遇金利」
+• リンク: 各プロトコルへの外部リンク
+• ステータス: 「統合済み」「近日公開」
+4. 非機能要件
+4.1 性能要件
+• ページロード時間: 初回3秒以内、2回目以降1秒以内
+• ZK証明生成時間: 10秒以内
+• トランザクション確認時間: Base上で5-15秒程度
+• 同時接続ユーザー: 1,000人以上対応
+• RPCレート制限: 1秒あたり100リクエストまで
+4.2 セキュリティ要件
+• プライバシー保護: すべての秘密情報（実スコア、詳細データ）はクライアント側のみで処理
+• データ保存: 証明のみオンチェーン、詳細はブラウザローカルストレージ
+• スマートコントラクト監査: デプロイ前にCertiKまたは同等の監査を実施（推奨）
+• 脆弱性対策: OWASP Top 10に準拠
+• ウォレット接続: 安全なウォレット接続プロトコル（EIP-1193）を使用
+4.3 ユーザビリティ要件
+• レスポンシブデザイン: デスクトップ、タブレット、モバイルに対応
+• ブラウザ対応: Chrome、Firefox、Safari、Brave（最新2バージョン）
+• アクセシビリティ: WCAG 2.1 Level AA準拠
+• 多言語: Phase 1は英語のみ、Phase 2で日本語対応
+• エラーメッセージ: ユーザーフレンドリーで具体的な内容
+4.4 保守性要件
+• コード品質: ESLint、Prettier適用
+• テストカバレッジ: ユニットテスト80%以上
+• ドキュメント: README、API仕様書、デプロイ手順書を整備
+• バージョン管理: Git（GitHub）
+• CI/CD: GitHub Actions使用
+5. デザイン仕様
+5.1 デザインコンセプト
+【方向性】プレミアム・高級感のあるデザイン
+• トーン: 洗練、信頼、プロフェッショナル
+• スタイル: モダン・ミニマル、ダークモード基調
+• 差別化要素: 金融グレードのUI、滑らかなアニメーション、高品質なタイポグラフィ
+5.2 カラーパレット
+【プライマリーカラー】
+• Deep Blue: #0A1929（背景、ベース）
+• Platinum: #E4E7EB（テキスト、ライト）
+• Gold Accent: #D4AF37（Elite、ハイライト）
+【セカンダリーカラー】
+• Silver: #B8C5D6（Advanced）
+• Bronze: #CD7F32（Intermediate）
+• Slate: #6B7D94（Beginner）
+• Neutral: #9CA3AF（New）
+【アクセントカラー】
+• Success Green: #10B981
+• Error Red: #EF4444
+• Warning Amber: #F59E0B
+5.3 タイポグラフィ
+【フォントファミリー】
+• ディスプレイ: 'Cinzel'（エレガント、金融的）
+• 本文: 'Inter'（読みやすさ重視）
+• 数値: 'JetBrains Mono'（等幅、スコア表示）
+【サイズ】
+• H1: 48px（ヒーロー）
+• H2: 36px（セクション見出し）
+• H3: 24px（サブ見出し）
+• Body: 16px（本文）
+• Small: 14px（補足）
+5.4 UI要素
+【ボタン】
+• プライマリー: ゴールドグラデーション、ホバーで光沢
+• セカンダリー: 透明背景 + ボーダー、ホバーで背景色
+【カード】
+• 背景: 半透明グラス効果（backdrop-blur）
+• ボーダー: 微妙なグラデーション
+• シャドウ: ソフトシャドウで浮遊感
+【アニメーション】
+• ページ遷移: フェードイン（0.3s ease）
+• スコア表示: カウントアップアニメーション
+• プログレスバー: 滑らかな進行
+• ホバー: 微妙な拡大（scale 1.02）
+5.5 レイアウト
+• グリッド: 12カラムグリッドシステム
+• 余白: 一貫したスペーシングスケール（4px単位）
+• コンテナ幅: 最大1280px（デスクトップ）
+• ナビゲーション: 固定ヘッダー（透過背景 + ブラー）
+• フッター: ミニマル、SNSリンクとコピーライトのみ
+6. スマートコントラクト仕様
+6.1 コントラクト構成
+6.1.1 BaseScoreVerifier.sol
+【目的】ZK証明を検証し、スコアをオンチェーンに記録
+【主要関数】
+• submitScore(): 証明を提出してスコアを登録
+• verifyProof(): ZK証明の正当性を検証
+• getScore(): 指定アドレスのスコア情報を取得
+• checkValidity(): スコアの有効性を確認
+• updateScore(): 既存スコアを更新
+6.1.2 データ構造
+struct ScoreProof {
+  address user;
+  uint16 scoreLevel; // 0-1000
+  uint8 tier; // 0=New, 1=Beginner, 2=Intermediate, 3=Advanced, 4=Elite
+  uint256 validUntil; // タイムスタンプ
+  bytes32 proofHash;
+  uint256 submittedAt;
+}
+6.1.3 イベント
+event ScoreSubmitted(address indexed user, uint16 scoreLevel, uint8 tier);
+event ScoreUpdated(address indexed user, uint16 newScoreLevel, uint8 newTier);
+event ScoreExpired(address indexed user);
+6.2 アクセス制御
+• submitScore(): 誰でも実行可能（自分のスコアのみ登録）
+• getScore(): 読み取り専用、誰でもアクセス可能
+• updateScore(): スコア所有者のみ実行可能
+• 管理者機能: なし（完全に分散化）
+6.3 ガス最適化
+• uint16使用: スコア値を節約
+• パッキング: 複数の変数を1つのスロットに格納
+• 不要な検証を削減: 必要最小限のチェックのみ
+• 目標ガスコスト: 50,000-80,000 gas/トランザクション
+7. ZK証明回路仕様（Noir）
+7.1 回路の目的
+ユーザーの実データ（残高、取引履歴等）を秘密にしたまま、「スコアがX点以上である」という主張を証明する。
+7.2 入力
+【プライベート入力（秘密情報）】
+• eth_balance: Field（ETH残高、wei単位）
+• holding_days: Field（保有日数）
+• tx_count: Field（取引回数）
+• active_days: Field（アクティブ日数）
+• dex_volume: Field（DEX取引量、wei単位）
+• lending_used: bool（レンディング利用有無）
+• lp_amount: Field（LP提供額、wei単位）
+• liquidation_count: Field（清算回数）
+• staking_amount: Field（ステーキング額、wei単位）
+【パブリック出力】
+• score: pub Field（計算されたスコア、0-1000）
+• threshold: pub Field（証明したい閾値）
+• meets_threshold: pub bool（score >= threshold）
+7.3 回路ロジック（疑似コード）
+fn main(
+  // プライベート入力
+  eth_balance: Field,
+  holding_days: Field,
+  tx_count: Field,
+  active_days: Field,
+  dex_volume: Field,
+  lending_used: bool,
+  lp_amount: Field,
+  liquidation_count: Field,
+  staking_amount: Field,
+  
+  // パブリック出力
+  pub score: Field,
+  pub threshold: Field,
+  pub meets_threshold: bool
+) {
+  // スコア計算
+  let eth_score = calculate_eth_score(eth_balance);
+  let holding_score = calculate_holding_score(holding_days);
+  let tx_score = calculate_tx_score(tx_count);
+  let active_score = calculate_active_score(active_days);
+  let dex_score = calculate_dex_score(dex_volume);
+  let lending_score = if lending_used { 150 } else { 0 };
+  let lp_score = calculate_lp_score(lp_amount);
+  let liquidation_penalty = liquidation_count * 200;
+  let staking_score = calculate_staking_score(staking_amount);
+  
+  let total_score = eth_score + holding_score + tx_score +
+                    active_score + dex_score + lending_score +
+                    lp_score + staking_score - liquidation_penalty;
+  
+  // スコアを0-1000に正規化
+  let normalized_score = min(total_score, 1000);
+  
+  // 検証
+  assert(score == normalized_score);
+  assert(meets_threshold == (score >= threshold));
+}
+8. 開発フェーズとマイルストーン
+8.1 Phase 1: MVP（本日ローンチ）
+【目標】基本的なスコアリング・証明機能の実装
+【実装内容】
+• ウォレット接続
+• 基本4指標でのスコア計算（残高、保有期間、取引回数、アクティブ期間）
+• ZK証明生成・検証（Noir）
+• スマートコントラクトデプロイ（Base Mainnet）
+• ダッシュボード（スコア表示）
+• 証明生成画面
+• ホーム/ランディングページ
+【デプロイ】
+• Base Mainnet
+• Vercel（フロントエンド）
+8.2 Phase 2: DeFi統合・機能拡張（ローンチ後2週間）
+【目標】DeFi統合とユーザー体験向上
+【実装内容】
+• DeFi特化指標の追加（DEX取引量、レンディング利用等）
+• Aerodrome統合
+• Aave統合
+• 証明履歴画面
+• 統合先プロトコル一覧
+• スコア改善提案機能
+• The Graph サブグラフ作成・デプロイ
+9. テスト計画
+9.1 ユニットテスト
+• スコア計算ロジック
+• ZK回路の正確性
+• スマートコントラクト関数
+• フロントエンドコンポーネント
+9.2 統合テスト
+• ウォレット接続からスコア証明までのフルフロー
+• The Graph連携
+• DeFiプロトコルからのスコア参照
+9.3 セキュリティテスト
+• スマートコントラクト監査
+• ZK証明の偽造不可能性テスト
+• フロントエンドXSS/CSRF対策
+9.4 ユーザビリティテスト
+• 5名のベータユーザーによるテスト
+• UIフィードバック収集
+• エラーケースの確認
+10. リスク管理
+リスク
+影響度
+発生確率
+対策
+ZK証明生成が遅い
+中
+中
+Web Worker使用、回路最適化、進行状況表示
+スマートコントラクトの脆弱性
+高
+低
+監査実施、バグバウンティプログラム
+Base RPCの不安定性
+中
+低
+複数RPC使用、フォールバック実装
+ユーザーがプライバシーを理解しない
+中
+中
+わかりやすい説明、FAQ充実
+DeFiプロトコルが統合しない
+高
+中
+プロトコルチームとの早期コミュニケーション、SDK提供
+競合サービスの出現
+中
+高
+継続的な機能改善、コミュニティ構築
+11. 成功指標（KPI）
+11.1 Phase 1（ローンチ後1週間）
+• ユニークユーザー数: 500人以上
+• スコア証明生成数: 200件以上
+• 平均証明生成時間: 10秒以内
+• エラー発生率: 5%以下
+11.2 Phase 2（ローンチ後1ヶ月）
+• ユニークユーザー数: 2,000人以上
+• DeFi統合利用数: 100件以上（AerodromeまたはAave経由）
+• リピート率: 30%以上
+• ユーザー満足度: 4.0/5.0以上
+12. 付録
+12.1 用語集
+• ZK-SNARKs: ゼロ知識証明の一種。情報を公開せずに正しさを証明
+• Noir: Aztecが開発したZK証明用のDSL
+• Base: CoinbaseによるEthereum Layer 2ブロックチェーン
+• TVL: Total Value Locked（プロトコルにロックされた総資産価値）
+• Aerodrome: Base上の主要DEX
+• Aave: 分散型レンディングプロトコル
+12.2 参考資料
+• Noir Documentation: https://noir-lang.org/
+• Base Documentation: https://docs.base.org/
+• Aerodrome Docs: https://aerodrome.finance/
+• Aave V3 Docs: https://docs.aave.com/
+12.3 変更履歴
+v1.0 - 2025/12/19 - 初版作成
+--- 要件定義書 終了 ---
+本書の内容は機密情報です。無断転載・複製を禁じます。
