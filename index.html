@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Base Score - Zero-knowledge privacy-assured DeFi scoring platform">
-    <title>Base Score | Privacy-First DeFi Reputation</title>
+    <meta name="description" content="Base Score - Institutional Credit Protocol on Base">
+    <title>Base Score | Institutional Credit Protocol</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -18,105 +18,166 @@
     <nav class="navbar">
         <div class="container nav-content">
             <a href="#" class="nav-logo">BASE <span>SCORE</span></a>
-            <button id="connect-btn" class="btn btn-primary" style="padding: 0.5rem 1.5rem; font-size: 0.9rem;">Connect
-                Wallet</button>
+
+            <div class="wallet-container">
+                <button id="connect-btn" class="btn btn-primary"
+                    style="padding: 0.5rem 1.5rem; font-size: 0.9rem;">Connect
+                    Entity Wallet</button>
+
+                <div id="wallet-dropdown" class="wallet-dropdown">
+                    <div class="dropdown-header">Connected Wallet</div>
+                    <div id="dropdown-current" class="dropdown-item active">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <div class="dropdown-header">History</div>
+                    <div id="dropdown-history">
+                        <!-- History Items -->
+                    </div>
+
+                    <div class="dropdown-action">
+                        <button id="switch-address-btn" class="btn-link">Input Other Address...</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </nav>
 
     <header class="hero">
-        <h1 class="hero-title">Base Score</h1>
-        <p class="hero-subtitle">ゼロ知識証明を活用したプライバシー保護型DeFiスコアリングプラットフォーム。<br>あなたの信用を、あなただけのものに。</p>
+        <h1 class="hero-title">Institutional Credit</h1>
+        <p class="hero-subtitle">The first undercollateralized lending protocol powered by ZK-proven financial
+            health.<br>Credit lines for DAOs and Web3 Corporates.</p>
         <div style="animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.4s backwards;">
-            <button id="launch-app-btn" class="btn btn-primary">スコアを証明する</button>
+            <button id="launch-app-btn" class="btn btn-primary">Assess Creditworthiness</button>
         </div>
     </header>
 
     <div id="dashboard" class="container" style="display: none; padding-top: 8rem;">
-        <h2 class="section-title">Your Base Score</h2>
-        <div class="card" style="text-align: center; max-width: 600px; margin: 0 auto;">
-            <div class="card-icon">🏆</div>
-            <h3 class="card-title">Score Analysis</h3>
-            <p class="card-text" style="margin-bottom: 2rem;">Wallet: <span id="wallet-address"
+        <!-- Viewing Mode Banner -->
+        <div id="viewing-banner" class="alert-banner" style="display: none;">
+            <span style="font-size: 1.25rem;">👀</span>
+            <div class="alert-text">
+                You are viewing the score of <span id="viewing-address-short"
+                    style="font-family: var(--font-mono); font-weight: 700;">0x...</span>.
+                <br>
+                <span style="font-size: 0.8rem; opacity: 0.8;">Verification actions are disabled in viewing mode.</span>
+            </div>
+            <a id="exit-viewing-mode" class="alert-link">Return to My Score</a>
+        </div>
+
+        <h2 class="section-title">Corporate Credit Profile</h2>
+
+        <!-- Score and Tier Section -->
+        <div class="card" style="text-align: center; max-width: 800px; margin: 0 auto; margin-bottom: 2rem;">
+            <div class="card-icon">🏛️</div>
+            <h3 class="card-title">Institutional Score</h3>
+            <p class="card-text" style="margin-bottom: 2rem;">Entity: <span id="wallet-address"
                     style="color: var(--color-primary); font-family: var(--font-mono); cursor: pointer; text-decoration: underline;"></span>
             </p>
 
-            <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 2rem;">
-                <div
-                    style="width: 200px; height: 200px; border-radius: 50%; border: 10px solid var(--color-primary); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 3rem; font-weight: 700; color: var(--color-text); box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);">
-                    750
+            <div
+                style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center; text-align: left;">
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    <div
+                        style="width: 180px; height: 180px; border-radius: 50%; border: 10px solid var(--color-primary); display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 3rem; font-weight: 700; color: var(--color-text); box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); margin-bottom: 1rem;">
+                        <span id="score-display">---</span>
+                    </div>
+                    <h4 id="tier-display"
+                        style="font-family: var(--font-display); font-size: 1.5rem; color: var(--color-secondary-silver);">
+                        TIER: ---</h4>
+                </div>
+
+                <div id="metrics-container" style="width: 100%;">
+                    <!-- Populated by JS -->
+                    <!-- Example structure -->
+                    <!-- 
+                    <div class="metric-item">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Treasury Health</span>
+                            <span>85/100</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill" style="width: 85%"></div></div>
+                    </div> 
+                    -->
                 </div>
             </div>
-
-            <h4 style="font-family: var(--font-display); font-size: 1.5rem; color: var(--color-secondary-silver);">TIER:
-                ADVANCED</h4>
         </div>
+
+        <!-- Benefits/Offers Section -->
         <div id="benefits-section"
             style="margin-top: 4rem; opacity: 0; animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s forwards;">
-            <h2 class="section-title">Exclusive Benefits</h2>
+            <h2 class="section-title">Available Credit Facilities</h2>
             <div class="grid-3">
-                <!-- Aerodrome Card -->
-                <div class="card benefit-card" id="benefit-aerodrome">
+
+                <!-- Revolving Credit -->
+                <div class="card benefit-card" id="benefit-revolving">
                     <div
                         style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                        <span class="card-icon">✈️</span>
-                        <span class="benefit-status locked">LOCKED</span>
+                        <span class="card-icon">🔄</span>
+                        <span class="benefit-status locked">PENDING</span>
                     </div>
-                    <h3 class="card-title">Aerodrome Finance</h3>
-                    <p class="card-text">High-score users receive boosted voting power and exclusive AERO airdrops.</p>
+                    <h3 class="card-title">Revolving Line</h3>
+                    <p class="card-text">Flexible working capital for day-to-day operations.</p>
                     <div class="benefit-details"
                         style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
-                        <p style="color: var(--color-primary); font-weight: 700;">+5% Voting Power</p>
-                        <p style="font-size: 0.9rem; color: var(--color-secondary-slate);">Req: Advanced Tier</p>
+                        <p style="color: var(--color-primary); font-weight: 700;" id="revolving-offer">Checking
+                            eligibility...</p>
+                        <p style="font-size: 0.9rem; color: var(--color-secondary-slate);">Rate: Floating (Base + 2%)
+                        </p>
                     </div>
                 </div>
 
-                <!-- Aave Card -->
-                <div class="card benefit-card" id="benefit-aave">
+                <!-- Term Loan -->
+                <div class="card benefit-card" id="benefit-term">
                     <div
                         style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                        <span class="card-icon">👻</span>
-                        <span class="benefit-status locked">LOCKED</span>
+                        <span class="card-icon">💼</span>
+                        <span class="benefit-status locked">PENDING</span>
                     </div>
-                    <h3 class="card-title">Aave V3</h3>
-                    <p class="card-text">Access reduced borrowing rates and higher LTV ratios for elite reputation.</p>
+                    <h3 class="card-title">Growth Term Loan</h3>
+                    <p class="card-text">Lump sum capital for expansion and strategic acquisitions.</p>
                     <div class="benefit-details"
                         style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
-                        <p style="color: var(--color-primary); font-weight: 700;">0.5% Rate Discount</p>
-                        <p style="font-size: 0.9rem; color: var(--color-secondary-slate);">Req: Elite Tier</p>
+                        <p style="color: var(--color-primary); font-weight: 700;" id="term-offer">Checking
+                            eligibility...</p>
+                        <p style="font-size: 0.9rem; color: var(--color-secondary-slate);">Rate: Fixed 6.5% APR</p>
                     </div>
                 </div>
 
-                <!-- Base Gas Card -->
-                <div class="card benefit-card" id="benefit-gas">
+                <!-- Premium Service -->
+                <div class="card benefit-card" id="benefit-advisory">
                     <div
                         style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
-                        <span class="card-icon">⛽</span>
-                        <span class="benefit-status locked">LOCKED</span>
+                        <span class="card-icon">🤝</span>
+                        <span class="benefit-status locked">PENDING</span>
                     </div>
-                    <h3 class="card-title">Base Gas Rebate</h3>
-                    <p class="card-text">Get monthly gas fee rebates for maintaining a high activity score.</p>
+                    <h3 class="card-title">Treasury Advisory</h3>
+                    <p class="card-text">Dedicated portfolio management and risk assessment services.</p>
                     <div class="benefit-details"
                         style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
-                        <p style="color: var(--color-primary); font-weight: 700;">10% Gas Back</p>
-                        <p style="font-size: 0.9rem; color: var(--color-secondary-slate);">Req: Intermediate Tier</p>
+                        <p style="color: var(--color-primary); font-weight: 700;">VIP Access</p>
+                        <p style="font-size: 0.9rem; color: var(--color-secondary-slate);">Req: Prime Tier</p>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- History Section -->
         <div id="history-section"
             style="margin-top: 4rem; opacity: 0; animation: fadeInUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.7s forwards;">
-            <h2 class="section-title">Verification History</h2>
+            <h2 class="section-title">Audit Log & History</h2>
             <div class="card" style="padding: 0; overflow: hidden;">
                 <table style="width: 100%; border-collapse: collapse; text-align: left;">
                     <thead>
                         <tr style="background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.1);">
                             <th style="padding: 1.5rem; color: var(--color-secondary-slate); font-weight: 600;">DATE
                             </th>
-                            <th style="padding: 1.5rem; color: var(--color-secondary-slate); font-weight: 600;">TIER
+                            <th style="padding: 1.5rem; color: var(--color-secondary-slate); font-weight: 600;">EVENT
                             </th>
                             <th style="padding: 1.5rem; color: var(--color-secondary-slate); font-weight: 600;">STATUS
                             </th>
-                            <th style="padding: 1.5rem; color: var(--color-secondary-slate); font-weight: 600;">TX HASH
+                            <th style="padding: 1.5rem; color: var(--color-secondary-slate); font-weight: 600;">PROOF
+                                HASH
                             </th>
                         </tr>
                     </thead>
@@ -132,33 +193,33 @@
         <!-- Futures Section -->
         <section class="features">
             <div class="container">
-                <h2 class="section-title">Why Base Score?</h2>
+                <h2 class="section-title">Institutional Grade Protocol</h2>
                 <div class="grid-3">
                     <!-- Feature 1 -->
                     <div class="card">
-                        <div class="card-icon">🛡️</div>
-                        <h3 class="card-title">Privacy First</h3>
+                        <div class="card-icon">📊</div>
+                        <h3 class="card-title">Integrated Financials</h3>
                         <p class="card-text">
-                            ZK-SNARKs技術により、取引履歴や残高を公開することなく、信用スコアのみを証明。
-                            プライバシーは完全に保護されます。
+                            Seamlessly connect DAO treasuries and bank APIs. We analyze cash flow, burn rate, and asset
+                            composition in real-time.
                         </p>
                     </div>
                     <!-- Feature 2 -->
                     <div class="card">
-                        <div class="card-icon">🔗</div>
-                        <h3 class="card-title">DeFi Integration</h3>
+                        <div class="card-icon">🔐</div>
+                        <h3 class="card-title">Zero-Knowledge Privacy</h3>
                         <p class="card-text">
-                            AerodromeやAaveなどの主要プロトコルと統合。
-                            高スコアユーザーには限定特典や優遇金利を提供。
+                            Prove creditworthiness without revealing sensitive counterparty data or specific trade
+                            strategies.
                         </p>
                     </div>
                     <!-- Feature 3 -->
                     <div class="card">
-                        <div class="card-icon">💎</div>
-                        <h3 class="card-title">Fair Reputation</h3>
+                        <div class="card-icon">🏦</div>
+                        <h3 class="card-title">Undercollateralized</h3>
                         <p class="card-text">
-                            保有資産だけでなく、Baseチェーン上での活動歴や貢献度を公平に評価。
-                            あなたのオンチェーン活動が価値になります。
+                            Unlock capital efficiency with credit lines based on reputation and off-chain assets, not
+                            just crypto collateral.
                         </p>
                     </div>
                 </div>
@@ -168,27 +229,30 @@
         <!-- How it works -->
         <section class="steps">
             <div class="container">
-                <h2 class="section-title">How it Works</h2>
+                <h2 class="section-title">Assessment Process</h2>
                 <div class="grid-3">
                     <div class="step-item">
                         <div class="step-number">01</div>
                         <div class="step-content">
-                            <h3>Connect Wallet</h3>
-                            <p class="card-text">ウォレットを接続してBase上のデータを安全にスキャンします。</p>
+                            <h3>Connect Entity</h3>
+                            <p class="card-text">Link your multi-sig safe or corporate wallet. Upload off-chain
+                                financial attestations.</p>
                         </div>
                     </div>
                     <div class="step-item">
                         <div class="step-number">02</div>
                         <div class="step-content">
-                            <h3>Generate Proof</h3>
-                            <p class="card-text">ブラウザ内でZK証明を生成。秘密鍵やデータが外部に送信されることはありません。</p>
+                            <h3>ZK Analysis</h3>
+                            <p class="card-text">Our Noir-based circuits verify liquidity ratios and runway without
+                                exposing raw data.</p>
                         </div>
                     </div>
                     <div class="step-item">
                         <div class="step-number">03</div>
                         <div class="step-content">
-                            <h3>Get Rewarded</h3>
-                            <p class="card-text">証明をオンチェーンに記録し、DeFiプロトコルで特典を受け取れます。</p>
+                            <h3>Credit Allocation</h3>
+                            <p class="card-text">Receive an instant credit score and access term sheets from liquidity
+                                providers.</p>
                         </div>
                     </div>
                 </div>
@@ -198,9 +262,25 @@
 
     <footer>
         <div class="container">
-            <p>&copy; 2025 Base Score. All rights reserved. Powered by Base & Noir.</p>
+            <p>&copy; 2025 Base Score Institutional. All rights reserved. Powered by Base & Noir.</p>
         </div>
     </footer>
+
+    <!-- Address Input Modal -->
+    <div id="address-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">View Other Entity</h3>
+                <button id="close-modal-btn" class="modal-close">&times;</button>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="modal-address-input" class="address-input" placeholder="0x... or vitalik.eth">
+            </div>
+
+            <button id="modal-submit-btn" class="btn btn-primary" style="width: 100%;">View Score</button>
+        </div>
+    </div>
 
     <script type="module" src="script.js"></script>
 </body>
