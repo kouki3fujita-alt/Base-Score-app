@@ -1,5 +1,5 @@
-import { createWalletClient, custom, http, parseEther, formatEther } from 'https://esm.sh/viem';
-import { mainnet, base } from 'https://esm.sh/viem/chains';
+import { createWalletClient, custom } from 'https://esm.sh/viem';
+import { base } from 'https://esm.sh/viem/chains';
 
 // Configuration
 const CHAIN = base;
