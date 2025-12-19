@@ -498,11 +498,96 @@ footer {
     color: #E4E7EB;
 }
 
-.alert-link {
+/* Smart Wallet Login Modal */
+.login-modal-content {
+    background: linear-gradient(145deg, #0D1F33, #050C14);
+    width: 90%;
+    max-width: 400px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 3rem 2rem;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+    overflow: hidden;
+}
+
+.biometric-icon {
+    font-size: 4rem;
     color: var(--color-primary);
-    text-decoration: underline;
-    cursor: pointer;
-    margin-left: auto;
+    margin-bottom: 2rem;
+    position: relative;
+    display: inline-block;
+}
+
+.biometric-scan-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: #00ff9d;
+    box-shadow: 0 0 10px #00ff9d;
+    animation: scan 1.5s ease-in-out infinite;
+    opacity: 0;
+}
+
+.login-status-text {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: var(--color-text);
+}
+
+.login-sub-text {
+    font-size: 0.9rem;
+    color: var(--color-secondary-slate);
+    margin-bottom: 2rem;
+}
+
+.login-btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.passkey-btn {
+    background: #fff;
+    color: #000;
+    border: none;
+    padding: 1rem;
+    border-radius: 12px;
     font-weight: 600;
-    font-size: 0.85rem;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: transform 0.2s;
+}
+
+.passkey-btn:hover {
+    transform: scale(1.02);
+}
+
+@keyframes scan {
+    0% {
+        top: 0;
+        opacity: 0;
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    80% {
+        opacity: 1;
+    }
+
+    100% {
+        top: 100%;
+        opacity: 0;
+    }
 }

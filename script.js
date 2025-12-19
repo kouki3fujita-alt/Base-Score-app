@@ -4,11 +4,14 @@ import { base } from 'https://esm.sh/viem/chains';
 // Configuration
 const CHAIN = base;
 
+// Smart Wallet Simulation Logic
+
 // State
 const state = {
     connectedAddress: null,
     viewingAddress: null,
-    history: [] // [{ address, score, tier, timestamp }]
+    history: [], // [{ address, score, tier, timestamp }]
+    isVirtual: false // flag for smart wallet
 };
 
 // DOM Elements
@@ -17,6 +20,7 @@ const launchAppBtn = document.getElementById('launch-app-btn');
 const heroSection = document.querySelector('.hero');
 const dashboardSection = document.getElementById('dashboard');
 const walletAddressDisplay = document.getElementById('wallet-address');
+const navLogo = document.querySelector('.nav-logo');
 
 // Wallet Switcher Elements
 const walletContainer = document.querySelector('.wallet-container');
@@ -25,7 +29,13 @@ const dropdownCurrent = document.getElementById('dropdown-current');
 const dropdownHistory = document.getElementById('dropdown-history');
 const switchAddressBtn = document.getElementById('switch-address-btn');
 
-// Modal Elements
+// Login Modal
+const loginModal = document.getElementById('login-modal');
+const passkeyLoginBtn = document.getElementById('passkey-login-btn');
+const loginStep1 = document.getElementById('login-step-1');
+const loginStep2 = document.getElementById('login-step-2');
+
+// Address Input Modal
 const addressModal = document.getElementById('address-modal');
 const closeModalBtn = document.getElementById('close-modal-btn');
 const modalSubmitBtn = document.getElementById('modal-submit-btn');
@@ -42,42 +52,42 @@ const generateProofBtn = document.getElementById('generate-proof-btn');
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Base Score Institutional App initialized');
     loadHistory();
-    checkConnection();
+    checkVirtualSession();
 
     // Global Event Listeners
     setupEventListeners();
 });
 
 function setupEventListeners() {
-    if (connectBtn) {
-        // Remove old listeners by cloning or just overwriting (assigning onclick is safer for simple scripts)
-        // For cleaner event handling, we will rely on our new logic. 
-        // Note: The previous script added listeners via addEventListener. 
-        // Since we are rewriting the file, the old listeners are gone from the code perspective, 
-        // but if the page is not reloaded, they might persist in memory? 
-        // We rely on page reload usually, but here we are editing the source.
+    if (connectBtn) connectBtn.onclick = openLoginModal;
+    if (launchAppBtn) launchAppBtn.onclick = openLoginModal;
 
-        connectBtn.onclick = handleConnectClick;
+    if (passkeyLoginBtn) passkeyLoginBtn.onclick = handlePasskeyLogin;
+
+    // Logo Click - Reset App
+    if (navLogo) {
+        navLogo.onclick = (e) => {
+            e.preventDefault();
+            resetApp();
+        };
     }
-
-    if (launchAppBtn) launchAppBtn.onclick = connectWallet;
 
     // Dropdown Toggling - Global Click
     document.addEventListener('click', (e) => {
         if (walletContainer && walletContainer.contains(e.target)) {
-            // inside click, handled by button
+            // inside click, handled by logic
         } else {
             closeDropdown();
         }
     });
 
     // Modal
-    if (switchAddressBtn) switchAddressBtn.onclick = openModal;
-    if (closeModalBtn) closeModalBtn.onclick = closeModal;
-    if (modalSubmitBtn) modalSubmitBtn.onclick = handleModalSubmit;
+    if (switchAddressBtn) switchAddressBtn.onclick = openAddressModal;
+    if (closeModalBtn) closeModalBtn.onclick = closeAddressModal;
+    if (modalSubmitBtn) modalSubmitBtn.onclick = handleAddressSubmit;
     if (modalInput) {
         modalInput.onkeypress = (e) => {
-            if (e.key === 'Enter') handleModalSubmit();
+            if (e.key === 'Enter') handleAddressSubmit();
         };
     }
 
@@ -96,83 +106,98 @@ function setupEventListeners() {
     }
 }
 
-// --- Wallet Logic ---
+// --- Smart Wallet Logic ---
 
-async function connectWallet() {
-    if (typeof window.ethereum === 'undefined') {
-        alert('MetaMask is not installed!');
+function checkVirtualSession() {
+    const storedSession = localStorage.getItem('virtual_session_address');
+    if (storedSession) {
+        loginWithVirtualAddress(storedSession);
+    }
+}
+
+function openLoginModal() {
+    if (state.connectedAddress) {
+        toggleDropdown();
         return;
     }
+    // Reset Modal State
+    if (loginStep1) loginStep1.style.display = 'block';
+    if (loginStep2) loginStep2.style.display = 'none';
+    if (loginModal) loginModal.classList.add('open');
+}
 
-    try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const address = accounts[0];
+function closeLoginModal() {
+    if (loginModal) loginModal.classList.remove('open');
+}
 
-        state.connectedAddress = address;
-        // If we were not viewing anyone specific, or just starting, view own
-        if (!state.viewingAddress) {
-            state.viewingAddress = address;
-        }
+function handlePasskeyLogin() {
+    // Show Loading
+    if (loginStep1) loginStep1.style.display = 'none';
+    if (loginStep2) loginStep2.style.display = 'block';
 
-        try {
-            await window.ethereum.request({
-                method: 'wallet_switchEthereumChain',
-                params: [{ chainId: `0x${CHAIN.id.toString(16)}` }],
-            });
-        } catch (switchError) {
-            // Ignore error for demo
-        }
+    // Simulate Biometric Scan & Chain Creation Delay
+    setTimeout(() => {
+        createVirtualWallet();
+    }, 1500);
+}
 
-        console.log('Connected:', address);
-        updateUI();
+function createVirtualWallet() {
+    // Generate a random address representing a smart wallet (ending in 8ase for fun)
+    const randomHex = Array(36).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+    const address = `0x${randomHex}8ae5`; // 8aes -> Base-ish
 
-        // If viewing own, fetch score
-        if (state.viewingAddress.toLowerCase() === state.connectedAddress.toLowerCase()) {
-            fetchAndRenderScore(state.viewingAddress);
-        }
+    // Persist
+    localStorage.setItem('virtual_session_address', address);
 
-    } catch (error) {
-        console.error('Connection error:', error);
+    loginWithVirtualAddress(address);
+    closeLoginModal();
+}
+
+function loginWithVirtualAddress(address) {
+    state.connectedAddress = address;
+    state.isVirtual = true;
+
+    // If we were not viewing anyone specific, view own
+    if (!state.viewingAddress) {
+        state.viewingAddress = address;
+    }
+
+    console.log('Smart Wallet Connected:', address);
+    updateUI();
+
+    if (state.viewingAddress && state.connectedAddress && state.viewingAddress.toLowerCase() === state.connectedAddress.toLowerCase()) {
+        fetchAndRenderScore(state.viewingAddress);
     }
 }
 
-async function checkConnection() {
-    if (typeof window.ethereum !== 'undefined') {
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-        if (accounts.length > 0) {
-            state.connectedAddress = accounts[0];
-            // If checking connection on load and not viewing anything, view own
-            if (!state.viewingAddress) {
-                state.viewingAddress = state.connectedAddress;
-            }
-            console.log('Restored connection:', state.connectedAddress);
-            updateUI();
-            fetchAndRenderScore(state.viewingAddress);
-        }
-    }
+function resetApp() {
+    // Clear State
+    state.connectedAddress = null;
+    state.viewingAddress = null;
+    state.isVirtual = false;
+
+    // Clear Persistence
+    localStorage.removeItem('virtual_session_address');
+
+    // Reset UI
+    updateUI();
+
+    // Close dropdowns/modals
+    closeDropdown();
+    closeLoginModal();
+    closeAddressModal();
+
+    console.log('App reset to initial state');
 }
 
-function handleConnectClick(e) {
-    if (!state.connectedAddress) {
-        connectWallet();
-    } else {
-        // Already connected, toggle dropdown
-        // e.stopPropagation() is needed on the button click to avoid immediate close by document listener
-        if (e) e.stopPropagation();
-        toggleDropdown();
-    }
-}
 
 // --- Viewing Logic ---
 
 function viewAddress(address) {
-    if (!isValidAddress(address)) {
-        alert('Invalid address format');
-        return;
-    }
+    if (!address) return;
 
     state.viewingAddress = address.toLowerCase();
-    closeModal();
+    closeAddressModal();
     updateUI();
     fetchAndRenderScore(state.viewingAddress);
 }
@@ -181,7 +206,7 @@ function returnToMyScore() {
     if (state.connectedAddress) {
         viewAddress(state.connectedAddress);
     } else {
-        connectWallet();
+        openLoginModal();
     }
 }
 
@@ -193,7 +218,7 @@ function fetchAndRenderScore(address) {
 
     // Simulate API call
     setTimeout(() => {
-        const data = getMockDataForAddress(address);
+        const data = getMockDataForAddress(address); // Use the weighted logic
         updateScoreUI(data.score, data.tier, data.metrics);
         unlockOffers(data.score, data.tier);
         renderHistoryTable(data.history);
@@ -209,10 +234,7 @@ function updateUI() {
     // 1. Toggle Sections
     if (state.connectedAddress || state.viewingAddress) {
         if (heroSection) heroSection.style.display = 'none';
-        if (dashboardSection) {
-            dashboardSection.style.display = 'block';
-            // Scroll only if just switching to dashboard? No, maybe annoying if switching addresses.
-        }
+        if (dashboardSection) dashboardSection.style.display = 'block';
     } else {
         if (heroSection) heroSection.style.display = 'flex';
         if (dashboardSection) dashboardSection.style.display = 'none';
@@ -220,19 +242,24 @@ function updateUI() {
 
     // 2. Connect Button & Dropdown
     if (state.connectedAddress) {
-        connectBtn.classList.add('connected');
+        if (connectBtn) connectBtn.classList.add('connected');
 
         // If viewing someone else, show "Viewing: 0x..."
         if (state.viewingAddress && state.connectedAddress.toLowerCase() !== state.viewingAddress.toLowerCase()) {
-            connectBtn.textContent = `Viewing: ${shorten(state.viewingAddress)}`;
-            connectBtn.style.background = '#6B7D94'; // Slate
-            connectBtn.style.color = '#fff';
-            connectBtn.style.border = '1px solid rgba(255,255,255,0.2)';
+            if (connectBtn) {
+                connectBtn.textContent = `Viewing: ${shorten(state.viewingAddress)}`;
+                connectBtn.style.background = '#6B7D94'; // Slate
+                connectBtn.style.color = '#fff';
+                connectBtn.style.border = '1px solid rgba(255,255,255,0.2)';
+            }
         } else {
-            connectBtn.textContent = shorten(state.connectedAddress);
-            connectBtn.style.background = ''; // reset to CSS
-            connectBtn.style.color = '';
-            connectBtn.style.border = '';
+            // Smart Wallet ID (Passkey)
+            if (connectBtn) {
+                connectBtn.innerHTML = '🔑 ' + shorten(state.connectedAddress);
+                connectBtn.style.background = '#fff';
+                connectBtn.style.color = '#000';
+                connectBtn.style.border = 'none';
+            }
         }
 
         // Dropdown Current
@@ -240,20 +267,22 @@ function updateUI() {
             dropdownCurrent.innerHTML = `
                 <div class="dropdown-item-content">
                     <h4>${shorten(state.connectedAddress)}</h4>
-                    <p>Connected Wallet</p>
+                    <p>${state.isVirtual ? 'Smart Wallet (Passkey)' : 'Connected Wallet'}</p>
                 </div>
-                ${(!state.viewingAddress || state.connectedAddress.toLowerCase() === state.viewingAddress.toLowerCase()) ? '<span style="color:#10B981">●</span>' : ''}
+                ${(!state.viewingAddress || (state.connectedAddress && state.viewingAddress.toLowerCase() === state.connectedAddress.toLowerCase())) ? '<span style="color:#10B981">●</span>' : ''}
             `;
             dropdownCurrent.onclick = () => {
                 viewAddress(state.connectedAddress);
                 closeDropdown();
             };
         }
-
     } else {
-        connectBtn.textContent = 'Connect Entity Wallet';
-        connectBtn.classList.remove('connected');
-        connectBtn.style.background = ''; // reset
+        if (connectBtn) {
+            connectBtn.innerHTML = 'Login with Passkey';
+            connectBtn.classList.remove('connected');
+            connectBtn.style.background = '#fff';
+            connectBtn.style.color = '#000';
+        }
     }
 
     // 3. Banner
@@ -273,7 +302,6 @@ function updateUI() {
             }
         } else {
             viewingBanner.style.display = 'none';
-
             // Enable actions
             if (generateProofBtn) {
                 generateProofBtn.disabled = false;
@@ -308,36 +336,25 @@ function loadHistory() {
 
 function addToHistory(address, score, tier) {
     if (!address) return;
-
-    // Remove existing if present to move to top
     const normalized = address.toLowerCase();
     state.history = state.history.filter(h => h.address.toLowerCase() !== normalized);
-
-    // Add new
     state.history.unshift({
         address: normalized,
         score: score,
         tier: tier,
         timestamp: Date.now()
     });
-
-    // Limit to 5
     if (state.history.length > 5) state.history.pop();
-
     localStorage.setItem('base_score_history', JSON.stringify(state.history));
-
-    // Re-render if dropdown open (or just to be safe)
     renderDropdownHistory();
 }
 
 function renderDropdownHistory() {
     if (!dropdownHistory) return;
-
     if (state.history.length === 0) {
         dropdownHistory.innerHTML = '<div style="padding:1rem; text-align:center; color:gray; font-size:0.8rem;">No recent history</div>';
         return;
     }
-
     dropdownHistory.innerHTML = state.history.map(item => `
         <div class="dropdown-item ${item.address.toLowerCase() === state.viewingAddress?.toLowerCase() ? 'active' : ''}" data-address="${item.address}">
             <div class="dropdown-item-content">
@@ -360,7 +377,7 @@ function closeDropdown() {
     if (walletDropdown) walletDropdown.classList.remove('show');
 }
 
-function openModal() {
+function openAddressModal() {
     closeDropdown();
     if (addressModal) {
         addressModal.classList.add('open');
@@ -368,42 +385,25 @@ function openModal() {
     }
 }
 
-function closeModal() {
+function closeAddressModal() {
     if (addressModal) addressModal.classList.remove('open');
     if (modalInput) modalInput.value = '';
 }
 
-function handleModalSubmit() {
+function handleAddressSubmit() {
     const val = modalInput.value.trim();
     if (!val) return;
-
-    // Mock ENS resolution
+    // Mock ENS resolution (same as before)
     if (val.endsWith('.eth')) {
-        // Deterministic mock resolve: Hash the string to get a mock address
         let hash = 0;
-        for (let i = 0; i < val.length; i++) {
-            hash = val.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        // Convert to hex
-        let color = '#';
+        for (let i = 0; i < val.length; i++) hash = val.charCodeAt(i) + ((hash << 5) - hash);
         let addr = '0x';
-        for (let i = 0; i < 20; i++) {
-            // Simple pseudo-random byte
-            const byte = Math.abs((hash >> (i * 2)) & 0xFF).toString(16).padStart(2, '0');
-            addr += byte;
-        }
-        // Ensure length
+        for (let i = 0; i < 20; i++) addr += Math.abs((hash >> (i * 2)) & 0xFF).toString(16).padStart(2, '0');
         if (addr.length < 42) addr = addr.padEnd(42, '0');
-
         viewAddress(addr);
     } else {
         viewAddress(val);
     }
-}
-
-function isValidAddress(address) {
-    if (!address) return false;
-    return /^0x[a-fA-F0-9]{40}$/.test(address);
 }
 
 function shorten(addr) {
@@ -412,56 +412,49 @@ function shorten(addr) {
 }
 
 
-// --- Mock Data & Dashboard Logic ---
+// --- Mock Data Logic (Weighted) ---
 
-// Mock Data Generators based on Address (Institutional Logic)
 function getMockDataForAddress(address) {
-    // Generate profile based on the last character of the address
     const lastChar = address.slice(-1).toLowerCase();
-
     let tier, metrics, history;
 
     // 1. Define Metrics based on Profile
     if (/[0-4]/.test(lastChar)) {
-        // Wallet 1: Prime Tier (Ideal)
+        // Wallet 1: Prime Tier
         tier = 'PRIME';
         metrics = { treasury: 95, cashFlow: 88, reputation: 98 };
         history = [
             { date: '2025-12-19', event: 'Credit Check', status: 'Approved', tx: address.slice(0, 6) + '...a1' },
-            { date: '2025-11-20', event: 'Treasury Audit', status: 'Verified', tx: '0xb2...c3' },
-            { date: '2025-10-05', event: 'Loan Repayment', status: 'Verified', tx: '0xd4...e5' }
+            { date: '2025-11-20', event: 'Treasury Audit', status: 'Verified', tx: '0xb2...c3' }
         ];
 
     } else if (/[5-9]/.test(lastChar)) {
-        // Wallet 2: High Growth (Growth Phase)
+        // Wallet 2: High Growth
         tier = 'HIGH GROWTH';
         metrics = { treasury: 75, cashFlow: 45, reputation: 78 };
         history = [
-            { date: '2025-12-19', event: 'Credit Check', status: 'Approved', tx: address.slice(0, 6) + '...f6' },
-            { date: '2025-12-10', event: 'Liquidity Provision', status: 'Verified', tx: '0xa1...b2' }
+            { date: '2025-12-19', event: 'Credit Check', status: 'Approved', tx: address.slice(0, 6) + '...f6' }
         ];
 
     } else {
-        // Wallet 3: Speculative (Early Stage)
+        // Wallet 3: Speculative
         tier = 'SPECULATIVE';
         metrics = { treasury: 35, cashFlow: 20, reputation: 40 };
         history = [
-            { date: '2025-12-19', event: 'Credit Check', status: 'Pending Review', tx: address.slice(0, 6) + '...c8' },
-            { date: '2025-12-18', event: 'Wallet Activation', status: 'Verified', tx: '0x12...34' }
+            { date: '2025-12-19', event: 'Wallet Activation', status: 'Verified', tx: '0x12...34' }
         ];
     }
 
     // 2. Calculate Weighted Score
     // Weight: Treasury 40%, Cash Flow 30%, Reputation 30%
     const weightedSum = (metrics.treasury * 0.4) + (metrics.cashFlow * 0.3) + (metrics.reputation * 0.3);
-
-    // Formula: Base 300 + (WeightedSum% of 550)
-    // Example: 100% -> 300 + 550 = 850
-    // Example: 50%  -> 300 + 275 = 575
     const score = Math.floor(300 + (weightedSum / 100 * 550));
 
     return { score, tier, metrics, history };
 }
+
+
+// --- Dashboard UI Helpers ---
 
 function resetOffers() {
     const cards = document.querySelectorAll('.benefit-card');
@@ -582,26 +575,4 @@ function renderHistoryTable(mockHistory) {
             <td style="padding: 1.5rem; font-family: var(--font-mono); color: var(--color-secondary-bronze);">${item.tx}</td>
         </tr>
     `).join('');
-}
-
-// Watch for wallet changes from MetaMask directly
-if (window.ethereum) {
-    window.ethereum.on('accountsChanged', (accounts) => {
-        if (accounts.length === 0) {
-            console.log('Wallet disconnected');
-            state.connectedAddress = null;
-            // Maybe keep viewing, but connection is gone
-            updateUI();
-        } else if (accounts[0] !== state.connectedAddress) {
-            console.log('Wallet changed:', accounts[0]);
-            state.connectedAddress = accounts[0];
-            // If we were viewing our own address, switch view to new address
-            // If viewing someone else, keep viewing them but update connection status
-            if (state.viewingAddress === null || state.viewingAddress.toLowerCase() === state.connectedAddress?.toLowerCase()) {
-                state.viewingAddress = state.connectedAddress;
-                fetchAndRenderScore(state.viewingAddress);
-            }
-            updateUI();
-        }
-    });
 }

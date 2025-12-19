@@ -1,0 +1,21 @@
+{
+  "name": "Base Score: Institutional Credit Protocol",
+  "short_name": "BaseScore",
+  "description": "The first ZK-proven credit scoring layer for undercollateralized lending on Base.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050C14",
+  "theme_color": "#D4AF37",
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/base-org/brand-kit/master/logo/symbol/Base_Symbol_Blue.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/base-org/brand-kit/master/logo/symbol/Base_Symbol_Blue.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
