@@ -1,8 +1,4 @@
-import { createWalletClient, custom } from 'https://esm.sh/viem';
-import { base } from 'https://esm.sh/viem/chains';
-
-// Configuration
-const CHAIN = base;
+// Smart Wallet Simulation Logic
 
 // Smart Wallet Simulation Logic
 
