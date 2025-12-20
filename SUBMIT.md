@@ -9,7 +9,7 @@ Base Scoreは、**機関投資家やDAOのための「信用スコア」プロ�
 
 ## デモ
 
-- **アプリURL**: [https://kouki3fujita-alt.github.io/Base-Score-app/](https://kouki3fujita-alt.github.io/Base-Score-app/)
+- **アプリURL**: [http://localhost:8080](http://localhost:8080)
 - **スライド**: [スライド (Slide.md)](./Slide.md)
 - **デモ動画**: [Watch Demo (WebP)](./demo.webp) <!-- TODO: Upload this video to YouTube/Loom/Drive for final submission -->
 
