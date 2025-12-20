@@ -1,3 +1,24 @@
+---
+marp: true
+theme: gaia
+class: invert
+paginate: true
+header: "Base Score: Institutional Credit Protocol"
+footer: "© 2025 Base Score"
+backgroundColor: #0A1929
+style: |
+  section {
+    font-family: 'Inter', sans-serif;
+  }
+  h1, h2, h3 {
+    color: #D4AF37;
+    font-family: 'Cinzel', serif;
+  }
+  strong {
+    color: #D4AF37;
+  }
+---
+
 # Base Score: Institutional Credit Protocol
 ## on Base
 
