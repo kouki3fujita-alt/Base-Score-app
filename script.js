@@ -414,39 +414,70 @@ function getMockDataForAddress(address) {
     const lastChar = address.slice(-1).toLowerCase();
     let tier, metrics, history;
 
-    // 1. Define Metrics based on Profile
-    if (/[0-4]/.test(lastChar)) {
-        // Wallet 1: Prime Tier
-        tier = 'PRIME';
-        metrics = { treasury: 95, cashFlow: 88, reputation: 98 };
-        history = [
-            { date: '2025-12-19', event: 'Credit Check', status: 'Approved', tx: address.slice(0, 6) + '...a1' },
-            { date: '2025-11-20', event: 'Treasury Audit', status: 'Verified', tx: '0xb2...c3' }
-        ];
+    function getMockDataForAddress(address) {
+        // 1. Deterministic Hash from Address
+        let hash = 0;
+        for (let i = 0; i < address.length; i++) {
+            hash = (hash << 5) - hash + address.charCodeAt(i);
+            hash |= 0; // Convert to 32bit integer
+        }
+        const seed = Math.abs(hash);
 
-    } else if (/[5-9]/.test(lastChar)) {
-        // Wallet 2: High Growth
-        tier = 'HIGH GROWTH';
-        metrics = { treasury: 75, cashFlow: 45, reputation: 78 };
-        history = [
-            { date: '2025-12-19', event: 'Credit Check', status: 'Approved', tx: address.slice(0, 6) + '...f6' }
-        ];
+        // 2. Generate Metrics (0-100) based on seed segments
+        // We use modulo to map the large hash to 0-100 range with some variance
+        const treasury = (seed % 100);
+        const cashFlow = ((seed >> 2) % 100);
+        const reputation = ((seed >> 4) % 100);
 
-    } else {
-        // Wallet 3: Speculative
-        tier = 'SPECULATIVE';
-        metrics = { treasury: 35, cashFlow: 20, reputation: 40 };
-        history = [
-            { date: '2025-12-19', event: 'Wallet Activation', status: 'Verified', tx: '0x12...34' }
-        ];
+        // Ensure roughly realistic minimums (institutions rarely have 0)
+        const m_treasury = 40 + (treasury * 0.6); // 40 - 100
+        const m_cashFlow = 20 + (cashFlow * 0.8); // 20 - 100
+        const m_reputation = 30 + (reputation * 0.7); // 30 - 100
+
+        // 3. Calculate Weighted Score
+        // Weight: Treasury 40%, Cash Flow 30%, Reputation 30%
+        const weightedSum = (m_treasury * 0.4) + (m_cashFlow * 0.3) + (m_reputation * 0.3);
+
+        // Scale to 300-850 range
+        const score = Math.floor(300 + (weightedSum / 100 * 550));
+
+        // 4. Determine Tier
+        let tier = 'SPECULATIVE';
+        if (score >= 700) tier = 'PRIME';
+        else if (score >= 500) tier = 'HIGH GROWTH';
+
+        // 5. Generate Textual History based on Score
+        let history = [];
+        const txPrefix = address.slice(0, 6);
+
+        if (tier === 'PRIME') {
+            history = [
+                { date: '2025-12-20', event: 'Liquidity Proof Verified', status: 'Verified', tx: txPrefix + '...a1' },
+                { date: '2025-11-15', event: 'Loan Repayment (On-Time)', status: 'Approved', tx: txPrefix + '...b2' }
+            ];
+        } else if (tier === 'HIGH GROWTH') {
+            history = [
+                { date: '2025-12-18', event: 'Credit Limit Increased', status: 'Approved', tx: txPrefix + '...c3' },
+                { date: '2025-10-30', event: 'New Collateral Added', status: 'Verified', tx: txPrefix + '...d4' }
+            ];
+        } else {
+            history = [
+                { date: '2025-12-19', event: 'Wallet Activation', status: 'Verified', tx: txPrefix + '...e5' },
+                { date: '2025-12-01', event: 'Low Balance Warning', status: 'Pending', tx: txPrefix + '...f6' }
+            ];
+        }
+
+        return {
+            score,
+            tier,
+            metrics: {
+                treasury: Math.round(m_treasury),
+                cashFlow: Math.round(m_cashFlow),
+                reputation: Math.round(m_reputation)
+            },
+            history
+        };
     }
-
-    // 2. Calculate Weighted Score
-    // Weight: Treasury 40%, Cash Flow 30%, Reputation 30%
-    const weightedSum = (metrics.treasury * 0.4) + (metrics.cashFlow * 0.3) + (metrics.reputation * 0.3);
-    const score = Math.floor(300 + (weightedSum / 100 * 550));
-
-    return { score, tier, metrics, history };
 }
 
 

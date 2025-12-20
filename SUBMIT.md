@@ -11,7 +11,7 @@ Base Scoreは、**機関投資家やDAOのための「信用スコア」プロ�
 
 - **アプリURL**: [Localhost Demo]
 - **スライド**: (TBD)
-- **デモ動画**: (TBD)
+- **デモ動画**: [Watch Demo (WebP)](./demo.webp) <!-- TODO: Upload this video to YouTube/Loom/Drive for final submission -->
 
 ## 推しポイント
 
